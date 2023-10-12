@@ -1,3 +1,5 @@
 # GAN-2023-project
 
-sourish, maxine, tomasz
+members: sourish, maxine, tomasz
+
+emoji generation using GANs from scratch
