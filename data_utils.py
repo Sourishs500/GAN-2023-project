@@ -17,10 +17,15 @@ class Dataset(torch.utils.data.Dataset):
         allImages = [f for f in os.listdir(self.image_folder_path) if os.path.isfile(os.path.join(self.image_folder_path, f))] 
         img = Image.open(self.image_folder_path + "/" + allImages[i])
         
-        convert_tensor = transforms.ToTensor()
-        convert_tensor(img)
+        transform = transforms.Compose([ 
+            transforms.PILToTensor() 
+        ]) 
         
-        return img
+        # transform = transforms.PILToTensor() 
+        # Convert the PIL image to Torch tensor 
+        img_tensor = transform(img)
+        
+        return img_tensor
     
     
     def __len__(self):
