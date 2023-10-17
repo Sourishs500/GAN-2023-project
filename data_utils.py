@@ -1,14 +1,29 @@
-import torch
+import os
+from PIL import Image
+from torchvision import transforms
+import torch.utils.data
 
 class Dataset(torch.utils.data.Dataset):
     def __init__(self, image_folder_path, desired_image_size):
-        # initialize the data from the path
-        pass
+        super(Dataset, self).__init__()
+      
+        # Store the folder path and desired image size for later use
+        self.image_folder_path = image_folder_path
+        self.desired_image_size = desired_image_size
+ 
 
     def __getitem__(self, i):
         # return the ith image as a tensor
-        pass
-
+        
+        allImages = [f for f in os.listdir(self.image_folder_path) if os.path.isfile(os.path.join(image_folder_path, f))] 
+        img = Image.open(allImages[i])
+        
+        convert_tensor = transforms.ToTensor()
+        convert_tensor(img)
+        
+        return img
+    
+    
     def __len__(self):
         # return the length of the dataset
         pass
