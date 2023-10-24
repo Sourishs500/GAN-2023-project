@@ -13,12 +13,11 @@ class Dataset(torch.utils.data.Dataset):
 
     def __getitem__(self, i):
         # return the ith image as a tensor
-        
         allImages = [f for f in os.listdir(self.image_folder_path) if os.path.isfile(os.path.join(self.image_folder_path, f))] 
         img = Image.open(self.image_folder_path + "/" + allImages[i])
         
         transform = transforms.Compose([ 
-            transforms.PILToTensor() 
+            transforms.ToTensor() 
         ]) 
         
         # transform = transforms.PILToTensor() 
