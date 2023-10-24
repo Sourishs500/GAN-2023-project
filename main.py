@@ -30,7 +30,8 @@ criterion = torch.nn.BCELoss()
 criterion.requires_grad = True
 
 # Create batch of latent vectors that we will use to visualize the progression of the generator
-fixed_noise = torch.randn(64, 100, 1, 1, device=device)
+# Change: 1x1 -> 72x72
+fixed_noise = torch.randn(batch_size, 100, 72, 72, device=device)
 
 # Establish convention for real and fake labels during training
 real_label = 1.
@@ -87,7 +88,7 @@ for epoch in tqdm(range(1, 1+num_epochs)):
         # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
         #######################################################
         
-        print(data.shape)
+        # print(data.shape)
         
         ## Train the Discriminator on Real Data
         discriminator.zero_grad()  # Zero out the gradients for the discriminator to ensure no accumulation from previous iterations.
@@ -152,6 +153,23 @@ for epoch in tqdm(range(1, 1+num_epochs)):
         if i % 50 == 0:
             with torch.no_grad():
                 fake = generator(fixed_noise).detach().cpu()
+                # print(fake[0].shape)
+                # print(fake[0])
+                # fakepil = torchvision.transforms.ToPILImage(fake[0])
+
+                # fakepil = fake.permute(1, 2, 0)
+                #print(fakepil.shape)
+
+                # normalize! before u train normalize -1..1 
+                # un-normalize: from -1...1 to lkajsdlkfj
+                
+                to_pil = torchvision.transforms.ToPILImage()
+                fakepil = to_pil(fake[0])
+
+                plt.figure(figsize=(10,10))
+                plt.imshow(fakepil)
+                plt.show()
+
             print(f"Generated images at epoch {epoch}, batch {i}")
 
 # generate images from the model
