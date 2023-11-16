@@ -41,8 +41,8 @@ fake_label = 0.
 lr = 0.0001
 
 # Setup optimizers for both generator and discriminator
-optimizerD = torch.optim.AdamW(generator.parameters(), lr=lr)
-optimizerG = torch.optim.AdamW(discriminator.parameters(), lr=lr)
+optimizerD = torch.optim.AdamW(discriminator.parameters(), lr=lr)
+optimizerG = torch.optim.AdamW(generator.parameters(), lr=lr)
 
 # functions that save and load the model and optimizer
 save_to = './checkpoints/model.pt'
@@ -91,8 +91,6 @@ torch.autograd.set_detect_anomaly(True)
 for epoch in tqdm(range(1, 1+num_epochs)):
     for i, data in enumerate(dataloader, 0):
 
-        print(i)
-
         discriminator.train()
         generator.train()
 
@@ -100,23 +98,19 @@ for epoch in tqdm(range(1, 1+num_epochs)):
         # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
         #######################################################
         
-        # print(data.shape)
         
         ## Train the Discriminator on Real Data
         discriminator.train() # Create a tensor filled with 'real_label' values, representing labels the discriminator should predict for real images.
         label = torch.full((len(data),), real_label)
         output = discriminator(data) # Pass real images through the discriminator and flatten the output.
         
-        # code that doesn't work
+        # code that doesn't work -- 
         # output = torch.argmax(torch.sigmoid(output), dim=1)
         
         label = label.double()
         output = torch.squeeze(output.double(), dim=1)
-        print("label:", label.shape)
-        print("output:", output.shape)
         
         errD_real = criterion(output, label)       # Calculate loss between discriminator's predictions and real labels.
-        # errD_real.requires_grad = True
         errD_real.backward()                       # Compute the gradients based on the loss
 
         D_x = output.mean().item()
@@ -125,18 +119,19 @@ for epoch in tqdm(range(1, 1+num_epochs)):
         noise = torch.randn(len(data), 100, 1, 1)  # Generate random noise to feed into the generator.
         
         optimizerG.zero_grad()
-        fake = generator(noise)                           # Use the generator to produce fake images from the noise.
+        with torch.no_grad():
+            fake = generator(noise)                           # Use the generator to produce fake images from the noise.
+
         label = torch.full((len(fake), ), fake_label)     # Change the label values to 'fake_label', representing fake images.
 
         # Pass the fake images (detached to avoid gradient computation for the generator) through the discriminator and flatten the output.
-        output = discriminator(fake.to(device))
+        output = discriminator(fake)
         # output = torch.argmax(torch.sigmoid(output), dim=1)
         
         label = label.double()
         output = torch.squeeze(output.double(), dim=1)
 
         errD_fake = criterion(output, label)              # Calculate loss between discriminator's predictions and fake labels.
-        # errD_fake.requires_grad = True
         errD_fake.backward()                             # Compute the gradients based on the loss.
 
         D_G_z1 = output.mean().item()
@@ -144,8 +139,6 @@ for epoch in tqdm(range(1, 1+num_epochs)):
         errD = errD_real + errD_fake  # Total discriminator loss is the sum of losses on real and fake data.
         optimizerD.step()  
         optimizerD.zero_grad()
-
-        # print("loss:", errD)
 
         ########################################################
         # (2) Update G network: maximize log(D(G(z)))
@@ -164,7 +157,6 @@ for epoch in tqdm(range(1, 1+num_epochs)):
 
         # Calculate loss for the generator based on how well the discriminator was fooled.
         errG = criterion(output, label)
-        # errG.requires_grad = True
         errG.backward()  # Compute the gradients based on the generator's loss.
         optimizerG.step() # Update the generator's parameters based on computed gradients.
         optimizerG.zero_grad()
@@ -183,9 +175,8 @@ for epoch in tqdm(range(1, 1+num_epochs)):
         # G_losses.append(errG.item())
         # D_losses.append(errD.item())
 
-
         # Periodically check the generator's outputs (here, every 50 batches as an example).
-        if epoch % 1 == 0 and i % 19 == 0:
+        if epoch % 20 == 0 and i % 19 == 0:
             with torch.no_grad():
                 generator.eval()
                 discriminator.eval() 
