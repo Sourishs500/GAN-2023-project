@@ -9,46 +9,39 @@ nc=3
 class Generator(torch.nn.Module):
     def __init__(self) -> None:
         super().__init__()
-        self.conv = torch.nn.ConvTranspose2d(
-            in_channels=100, 
-            out_channels=3,
-            kernel_size=64,
-            stride=3,
-            padding=0,
-            bias=False
-        ) 
-        # self.main = nn.Sequential(
-        #     # input is Z, going into a convolution
-        #     nn.ConvTranspose2d( nz, ngf * 8, 4, 1, 0, bias=False),
-        #     nn.BatchNorm2d(ngf * 8),
-        #     nn.ReLU(False),
-        #     # state size. ``(ngf*8) x 4 x 4``
-        #     nn.ConvTranspose2d(ngf * 8, ngf * 4, 4, 2, 1, bias=False),
-        #     nn.BatchNorm2d(ngf * 4),
-        #     nn.ReLU(False),
-        #     # state size. ``(ngf*4) x 8 x 8``
-        #     nn.ConvTranspose2d( ngf * 4, ngf * 2, 4, 2, 1, bias=False),
-        #     nn.BatchNorm2d(ngf * 2),
-        #     nn.ReLU(False),
-        #     # state size. ``(ngf*2) x 16 x 16``
-        #     nn.ConvTranspose2d( ngf * 2, ngf, 4, 2, 1, bias=False),
-        #     nn.BatchNorm2d(ngf),
-        #     nn.ReLU(False),
-        #     # state size. ``(ngf) x 32 x 32``
-        #     nn.ConvTranspose2d( ngf, nc, 4, 2, 1, bias=False),
-        #     nn.Tanh()
-        #     # state size. ``(nc) x 64 x 64``
-        # )
+        # self.conv = torch.nn.ConvTranspose2d(
+        #     in_channels=100, 
+        #     out_channels=3,
+        #     kernel_size=64,
+        #     stride=3,
+        #     padding=0,
+        #     bias=False
+        # ) 
+        self.main = nn.Sequential(
+            # input is Z, going into a convolution
+            nn.ConvTranspose2d( nz, ngf * 8, 4, 1, 0, bias=False),
+            nn.BatchNorm2d(ngf * 8),
+            nn.ReLU(False),
+            # state size. ``(ngf*8) x 4 x 4``
+            nn.ConvTranspose2d(ngf * 8, ngf * 4, 4, 2, 1, bias=False),
+            nn.BatchNorm2d(ngf * 4),
+            nn.ReLU(False),
+            # state size. ``(ngf*4) x 8 x 8``
+            nn.ConvTranspose2d( ngf * 4, ngf * 2, 4, 2, 1, bias=False),
+            nn.BatchNorm2d(ngf * 2),
+            nn.ReLU(False),
+            # state size. ``(ngf*2) x 16 x 16``
+            nn.ConvTranspose2d( ngf * 2, ngf, 4, 2, 1, bias=False),
+            nn.BatchNorm2d(ngf),
+            nn.ReLU(False),
+            # state size. ``(ngf) x 32 x 32``
+            nn.ConvTranspose2d( ngf, nc, 4, 2, 1, bias=False),
+            nn.Tanh()
+            # state size. ``(nc) x 64 x 64``
+        )
 
     def forward(self, z):
-        print("gen", z.shape)
-        # z = torch.reshape(z, (4, 4, 1024))
-        z = self.conv(z)
-        print("gen", z.shape)
-        return z
-        # z = self.main(z)
-        # print("out:", out.shape)
-        # return z
+        return self.main(z)
     
 class Discriminator(torch.nn.Module):
     def __init__(self) -> None:
@@ -67,7 +60,6 @@ class Discriminator(torch.nn.Module):
         # throw a sigmoid in here
 
     def forward(self, image):
-        # print("before proc", image.shape)
         image = self.pool(F.relu(self.conv1(image)))
         image = self.pool(F.relu(self.conv2(image)))
         image = self.pool(F.relu(self.conv3(image)))
